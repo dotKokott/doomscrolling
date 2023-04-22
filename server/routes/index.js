@@ -1,9 +1,12 @@
-var express = require('express');
-var router = express.Router();
+import express from 'express';
+const router = express.Router();
 
-/* GET home page. */
-router.get('/', function(req, res, next) {
-  res.render('index', { title: 'Express' });
+import chatgpt from '../services/chatgpt.js';
+
+router.get('/test', async function(req, res, next) {
+  const gpt = await chatgpt.getResponse('Give me 5 reasons to drink a coffee', 'gpt-3.5-turbo-0301');
+
+  res.send(gpt);
 });
 
 module.exports = router;

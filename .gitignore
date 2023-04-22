@@ -131,3 +131,5 @@ dist
 
 secrets.js
 dist-server
+
+.env
