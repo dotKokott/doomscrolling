@@ -133,3 +133,5 @@ secrets.js
 dist-server
 
 .env
+
+.DS_STORE

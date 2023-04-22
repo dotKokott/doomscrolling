@@ -18,13 +18,16 @@ class ChatGPTService {
             const data = fs.readFileSync(promptCacheFileNamwe)
             this.promptCache = JSON.parse(data)
         }
-
-        console.log(this.promptCache)
     }
 
     async savePromptCache() {
         const promptCacheFileNamwe = path.join(__dirname, '../../promptCache.json')
         fs.writeFileSync(promptCacheFileNamwe, JSON.stringify(this.promptCache))
+    }
+
+    addPromptToCache(prompt, response) {
+        this.promptCache[prompt] = response
+        this.savePromptCache()
     }
 
     getOpenAI() {
@@ -53,11 +56,6 @@ class ChatGPTService {
                 {"role": "user", "content": prompt}
             ],
         })
-
-
-        this.promptCache[prompt] = response.data.choices[0].message.content
-
-        this.savePromptCache()
 
         return this.promptCache[prompt]
     }

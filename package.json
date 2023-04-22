@@ -5,8 +5,7 @@
   "nodemonConfig": {
     "exec": "npm run dev",
     "watch": [
-      "server/*",
-      "public/*"
+      "server/*"      
     ],
     "ignore": [
       "**/__tests__/**",
@@ -17,7 +16,7 @@
   "scripts": {
     "start": "npm run prod",
     "build": "npm-run-all clean transpile",
-    "server": "node ./dist-server/bin/www",
+    "server": "node -r dotenv/config ./dist-server/bin/www",
     "dev": "NODE_ENV=development npm-run-all build server",
     "prod": "NODE_ENV=production npm-run-all build server",
     "transpile": "babel ./server --out-dir dist-server",
@@ -31,7 +30,9 @@
     "cookie-parser": "~1.4.4",
     "debug": "~2.6.9",
     "dotenv": "^16.0.3",
+    "elevenlabs-node": "^1.0.2",
     "express": "~4.16.1",
+    "md5": "^2.3.0",
     "morgan": "~1.9.1",
     "nodemon": "^2.0.22",
     "npm-run-all": "^4.1.5",
