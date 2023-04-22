@@ -32,6 +32,7 @@ router.get('/getTweets', async function(req, res, next) {
   const amount = req.query.amount || 10;
   const year = req.query.year || "";
   const headline = req.query.headline;
+  const withWavBlob = req.query.withWavBlob || false;
 
   console.log(req.query)
 

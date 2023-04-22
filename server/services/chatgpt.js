@@ -55,10 +55,8 @@ class ChatGPTService {
                 {"role": "user", "content": prompt}
             ],
         })
-        
-        this.addPromptToCache(prompt, response.data.choices[0].message.content)
 
-        console.log(this.promptCache)
+        this.addPromptToCache(prompt, response.data.choices[0].message.content)
 
         return this.promptCache[prompt]
     }

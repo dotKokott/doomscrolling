@@ -30,10 +30,15 @@ class TextToSpeechService {
         return v
     }
 
-    async say(text, voice, stability = 0.75, similarity_boost = 0.75) {
+    sanitize(text) {
+        return text.replace('#', 'hashtag ')
+    }
+
+    async say(text, voice, stability = 0.75, similarity_boost = 0.75) {        
         const textmd5 = md5(text)
         const filename = path.join(__dirname, `../../voiceCache/${textmd5}.wav`)
-            
+    
+        text = this.sanitize(text)
         // check if file exists
         if(!fs.existsSync(filename)) {                    
             await elevenlabs.textToSpeech(process.env.ELEVENLABS_API_KEY, voice.voice_id, filename, text)            
