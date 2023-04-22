@@ -89,13 +89,15 @@ const headlines = [
 const headlineObjects = headlines.map(h => new Headline(h.year, h.text))
 const leftPan = new Tone.Panner(-1).toDestination()
 const rightPan = new Tone.Panner(1).toDestination()
+const fatOsc = new Tone.FatOscillator("Ab3", "sawtooth").toDestination()
 
 async function main() {
-    for (const headline of headlineObjects) {        
-        await headline.generateTweets()
-        await headline.readTweets()
-        break
-    }
+    createOscillators()
+    // for (const headline of headlineObjects) {        
+    //     await headline.generateTweets()
+    //     await headline.readTweets()
+    //     break
+    // }
 }
 
 //attach a click listener to a play button
@@ -105,3 +107,41 @@ document.getElementById('start_btn').addEventListener('click', async () => {
 
     main()
 })
+
+const numOctaves = 8;
+const baseFrequency = 55; 
+
+// Create oscillators and gain nodes for each octave
+const oscillators = [];
+const gains = [];
+
+function createOscillators() {
+    for (let i = 0; i < numOctaves; i++) {
+        const osc = new Tone.Oscillator(baseFrequency * Math.pow(2, i), "sine").start();
+        const gain = new Tone.Gain(0).toDestination();
+    
+        osc.connect(gain);
+    
+        oscillators.push(osc);
+        gains.push(gain);
+    }
+}
+
+
+// Update oscillators and gains based on scroll position
+const updateTone = () => {
+    const scrollY = window.scrollY || window.pageYOffset;
+    const maxHeight = document.body.scrollHeight - window.innerHeight;
+    const scrollRatio = scrollY / maxHeight;
+
+    for (let i = 0; i < numOctaves; i++) {
+        const frequency = baseFrequency * Math.pow(2, i + scrollRatio);
+        oscillators[i].frequency.setValueAtTime(frequency, Tone.now());
+        gains[i].gain.setValueAtTime(1 - (i - scrollRatio) % 1, Tone.now());
+    }
+};
+
+document.addEventListener('wheel', (e) => {    
+    updateTone()
+})
+    
