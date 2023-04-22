@@ -93,6 +93,7 @@ const fatOsc = new Tone.FatOscillator("Ab3", "sawtooth").toDestination()
 
 async function main() {
     createOscillators()
+    updateTone(0)
     // for (const headline of headlineObjects) {        
     //     await headline.generateTweets()
     //     await headline.readTweets()
@@ -108,19 +109,23 @@ document.getElementById('start_btn').addEventListener('click', async () => {
     main()
 })
 
-const numOctaves = 8;
+const numOctaves = 6;
+const oscillatorsPerOctave = 6;
 const baseFrequency = 55; 
 
 // Create oscillators and gain nodes for each octave
 const oscillators = [];
 const gains = [];
+const filter = new Tone.Filter(20000, "lowpass").toDestination(); // Add a lowpass filter to reduce harsh noise
 
 function createOscillators() {
-    for (let i = 0; i < numOctaves; i++) {
-        const osc = new Tone.Oscillator(baseFrequency * Math.pow(2, i), "sine").start();
-        const gain = new Tone.Gain(0).toDestination();
+    for (let i = 0; i < numOctaves * oscillatorsPerOctave; i++) {
+        const freqMultiplier = Math.pow(2, i / oscillatorsPerOctave);
+        const osc = new Tone.Oscillator(baseFrequency * freqMultiplier, "sine").start();
+        const gain = new Tone.Gain(0);
     
         osc.connect(gain);
+        gain.connect(filter); // Connect gain nodes to the filter instead of the destination
     
         oscillators.push(osc);
         gains.push(gain);
@@ -129,19 +134,29 @@ function createOscillators() {
 
 
 // Update oscillators and gains based on scroll position
-const updateTone = () => {
+// Update oscillators and gains based on scroll position
+const updateTone = (scrollRatio) => {
+    const scrollY = window.scrollY || window.pageYOffset;
+    const maxHeight = document.body.scrollHeight - window.innerHeight;    
+
+    for (let i = 0; i < numOctaves * oscillatorsPerOctave; i++) {
+        const freqMultiplier = Math.pow(2, i / oscillatorsPerOctave + scrollRatio);
+        const frequency = baseFrequency * freqMultiplier;
+        oscillators[i].frequency.setValueAtTime(frequency, Tone.now());
+
+        const gainValue = 1 - (i / oscillatorsPerOctave - scrollRatio) % 1;
+        gains[i].gain.setValueAtTime(gainValue * gainValue, Tone.now()); // Apply a quadratic curve to make the transitions smoother
+    }
+};
+document.addEventListener('wheel', (e) => {    
     const scrollY = window.scrollY || window.pageYOffset;
     const maxHeight = document.body.scrollHeight - window.innerHeight;
     const scrollRatio = scrollY / maxHeight;
+    updateTone(scrollRatio);
 
-    for (let i = 0; i < numOctaves; i++) {
-        const frequency = baseFrequency * Math.pow(2, i + scrollRatio);
-        oscillators[i].frequency.setValueAtTime(frequency, Tone.now());
-        gains[i].gain.setValueAtTime(1 - (i - scrollRatio) % 1, Tone.now());
+    // Implement infinite scroll by resetting the scroll position when it reaches the bottom of the page
+    if (scrollY >= maxHeight) {
+        window.scrollTo(0, 1); // Scroll back to the top
     }
-};
-
-document.addEventListener('wheel', (e) => {    
-    updateTone()
 })
     
