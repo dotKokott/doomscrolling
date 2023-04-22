@@ -20,7 +20,7 @@ class ChatGPTService {
         }
     }
 
-    async savePromptCache() {
+    savePromptCache() {
         const promptCacheFileNamwe = path.join(__dirname, '../../promptCache.json')
         fs.writeFileSync(promptCacheFileNamwe, JSON.stringify(this.promptCache))
     }
@@ -44,10 +44,9 @@ class ChatGPTService {
 
     async getResponse(prompt, model = 'gpt-3.5-turbo', temperature = 0.7) {
         // Check cache
-        console.log(this.promptCache)
         if (this.promptCache[prompt] !== undefined) {
             return this.promptCache[prompt]
-        }
+        }        
 
         const response = await this.getOpenAI().createChatCompletion({
             model: model,
@@ -56,6 +55,10 @@ class ChatGPTService {
                 {"role": "user", "content": prompt}
             ],
         })
+        
+        this.addPromptToCache(prompt, response.data.choices[0].message.content)
+
+        console.log(this.promptCache)
 
         return this.promptCache[prompt]
     }
