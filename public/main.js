@@ -14,6 +14,8 @@ class Headline {
     }
 
     async generateTweets() {
+        console.log(`Generating tweets for ${this.text} in ${this.year}...`)
+
         const response = await fetch(`/getTweets?` + new URLSearchParams({
             headline: this.text,
             year: this.year,
@@ -82,6 +84,12 @@ const leftPan = new Tone.Panner(-1).toDestination()
 const rightPan = new Tone.Panner(1).toDestination()
 
 async function main() {
+    const currentHeadline = headlineObjects[0]
+    console.log("Generating tweets")
+    await currentHeadline.generateTweets()
+    console.log("Generated tweets")
+    await currentHeadline.readTweets()
+
     // createOscillators()
     // updateTone(0)
     // for (const headline of headlineObjects) {        
@@ -92,62 +100,12 @@ async function main() {
 }
 
 //attach a click listener to a play button
-// document.getElementById('start_btn').addEventListener('click', async () => {
-//     await Tone.start()
-//     console.log('audio is ready')
+document.documentElement.addEventListener('click', async () => {
+    await Tone.start()
+    console.log('audio is ready')
 
-//     main()
-// })
-
-
-
-// const headlineContainer = document.getElementById('headline-container');
-// let currentHeadlineIndex = 0;
-
-// function createHeadlineElement(text) {
-//     const headlineElement = document.createElement('div');
-//     headlineElement.classList.add('headline');
-//     headlineElement.innerHTML = text;
-//     return headlineElement;
-// }
-
-// function showHeadline(index) {
-//     const headlineElement = headlineContainer.children[index];
-//     headlineElement.classList.add('visible');
-// }
-
-// function hideHeadline(index) {
-//     const headlineElement = headlineContainer.children[index];
-//     headlineElement.classList.remove('visible');
-// }
-
-// function setupHeadlines() {
-//     headlines.forEach((headline) => {
-//         const headlineElement = createHeadlineElement(headline.text);
-//         headlineContainer.appendChild(headlineElement);
-//     });
-//     showHeadline(currentHeadlineIndex);
-// }
-
-// function handleScroll() {
-//     const scrollPosition = window.pageYOffset;
-//     const windowHeight = window.innerHeight;
-//     const scrollIndex = Math.floor(scrollPosition / windowHeight);
-
-//     if (scrollIndex !== currentHeadlineIndex) {
-//         hideHeadline(currentHeadlineIndex);
-//         currentHeadlineIndex = scrollIndex;
-//         showHeadline(currentHeadlineIndex);
-//     }
-// }
-
-// function init() {
-//     setupHeadlines();
-//     document.body.style.height = `${headlines.length * 100}vh`;
-//     window.addEventListener('scroll', handleScroll);
-// }
-
-// init();
+    main()
+})
 
 
 const headlineContainer = document.getElementById('headline-container');
@@ -216,8 +174,7 @@ function setupTimeline() {
     document.body.appendChild(timeline);
 }
 
-function updateActiveYear() {
-    const currentHeadlineIndex = getCurrentHeadline();
+function updateActiveYear(currentHeadlineIndex) {    
     const timelineYears = document.querySelectorAll('.timeline-year');
     timelineYears.forEach((year, index) => {
         if (index === currentHeadlineIndex) {
@@ -243,8 +200,7 @@ function handleScroll(event) {
       });
 
     const currentHeadlineIndex = getCurrentHeadline();
-    updateActiveYear();
-    console.log(`Current headline index: ${currentHeadlineIndex}`);
+    updateActiveYear(currentHeadlineIndex);
 }
 
 function init() {

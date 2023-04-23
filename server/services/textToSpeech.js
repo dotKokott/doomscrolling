@@ -41,7 +41,7 @@ class TextToSpeechService {
         text = this.sanitize(text)
         // check if file exists
         if(!fs.existsSync(filename)) {                    
-            await elevenlabs.textToSpeech(process.env.ELEVENLABS_API_KEY, voice.voice_id, filename, text)            
+            await elevenlabs.textToSpeech(process.env.ELEVENLABS_API_KEY, voice.voice_id, filename, text, stability, similarity_boost)
         }
 
         return filename     
