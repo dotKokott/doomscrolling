@@ -1,12 +1,116 @@
-/* css reset */
+/* * {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+body, html {
+  height: 100%;
+  font-family: 'Georgia', serif;
+}
+
+#headline-container {
+  height: 100%;
+  position: relative;
+}
+
+.headline {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  text-align: center;
+  font-size: 2rem;
+  padding: 1rem;
+  opacity: 0;
+  transition: opacity 1s;
+}
+
+.headline.visible {
+  opacity: 1;
+} */
+
 * {
   margin: 0;
   padding: 0;
   box-sizing: border-box;
 }
 
-body {
-  font: 14px "Lucida Grande", Helvetica, Arial, sans-serif;
-  /* background: linear-gradient(90deg, rgba(255,0,0,1) 0%, rgba(255,154,0,1) 50%, rgba(0,255,0,1) 100%); */
-  height: 5000px;
+body, html {
+  height: 100%;  
+  overflow-x: hidden;
+  font-family: 'Noto Sans', sans-serif;
+  background-color: #1c1c1c;
+  color: #f0f0f0;  
+}
+
+#headline-container {
+  display: grid;
+  grid-template-rows: repeat(auto-fit, 100vh);
+  height: 100%;
+}
+
+.headline {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  text-align: center;
+  font-size: 2rem;
+  padding: 1rem;
+  height: 100vh;
+  margin-right: 120px;
+}
+
+.headline-text {
+  font-size: 2rem;
+  font-family: 'Bitter', serif; /* Add a dramatic font */
+}
+
+.headline-year {
+  position: absolute;
+  bottom: 20px;
+  right: 20px;
+  font-size: 1.5rem;
+  font-weight: bold;
+  opacity: 0.7;
+}
+
+.timeline {
+  position: fixed;
+  top: 0;
+  bottom: 0;
+  right: 20px;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  height: 100%;
+}
+
+.timeline-line {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: 50%;
+  border-left: 1px solid #ccc;
+  width: 0;
+  height: 100%;
+}
+
+.timeline-year {
+  position: relative;
+  font-size: 1.2rem;
+  font-weight: bold;
+  opacity: 0.7;
+  text-align: right;
+  padding-left: 5px;
+  padding-right: 5px;
+}
+
+.active-year {
+  color: #1a73e8;
+  opacity: 1;
 }

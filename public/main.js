@@ -1,3 +1,5 @@
+import { headlines } from './headlines.js'
+
 class Headline {
     year
     text
@@ -75,25 +77,13 @@ class Headline {
     }
 }
 
-const headlines = [
-    {
-        year: 2019,
-        text: "Increasing disasters (tropical cyclones, wildfires, etc.) join scientists' warnings to spur public demonstrations and civil disobedience.",
-    },
-    {
-        year: 2021,
-        text: "Mean global temperature is 14.8°C, the warmest in tens of thousands of years. Level of CO2 in the atmosphere is 418 ppm, the highest in millions of years.",
-    }
-]
-
 const headlineObjects = headlines.map(h => new Headline(h.year, h.text))
 const leftPan = new Tone.Panner(-1).toDestination()
 const rightPan = new Tone.Panner(1).toDestination()
-const fatOsc = new Tone.FatOscillator("Ab3", "sawtooth").toDestination()
 
 async function main() {
-    createOscillators()
-    updateTone(0)
+    // createOscillators()
+    // updateTone(0)
     // for (const headline of headlineObjects) {        
     //     await headline.generateTweets()
     //     await headline.readTweets()
@@ -102,61 +92,153 @@ async function main() {
 }
 
 //attach a click listener to a play button
-document.getElementById('start_btn').addEventListener('click', async () => {
-    await Tone.start()
-    console.log('audio is ready')
+// document.getElementById('start_btn').addEventListener('click', async () => {
+//     await Tone.start()
+//     console.log('audio is ready')
 
-    main()
-})
+//     main()
+// })
 
-const numOctaves = 6;
-const oscillatorsPerOctave = 6;
-const baseFrequency = 55; 
 
-// Create oscillators and gain nodes for each octave
-const oscillators = [];
-const gains = [];
-const filter = new Tone.Filter(20000, "lowpass").toDestination(); // Add a lowpass filter to reduce harsh noise
 
-function createOscillators() {
-    for (let i = 0; i < numOctaves * oscillatorsPerOctave; i++) {
-        const freqMultiplier = Math.pow(2, i / oscillatorsPerOctave);
-        const osc = new Tone.Oscillator(baseFrequency * freqMultiplier, "sine").start();
-        const gain = new Tone.Gain(0);
-    
-        osc.connect(gain);
-        gain.connect(filter); // Connect gain nodes to the filter instead of the destination
-    
-        oscillators.push(osc);
-        gains.push(gain);
-    }
+// const headlineContainer = document.getElementById('headline-container');
+// let currentHeadlineIndex = 0;
+
+// function createHeadlineElement(text) {
+//     const headlineElement = document.createElement('div');
+//     headlineElement.classList.add('headline');
+//     headlineElement.innerHTML = text;
+//     return headlineElement;
+// }
+
+// function showHeadline(index) {
+//     const headlineElement = headlineContainer.children[index];
+//     headlineElement.classList.add('visible');
+// }
+
+// function hideHeadline(index) {
+//     const headlineElement = headlineContainer.children[index];
+//     headlineElement.classList.remove('visible');
+// }
+
+// function setupHeadlines() {
+//     headlines.forEach((headline) => {
+//         const headlineElement = createHeadlineElement(headline.text);
+//         headlineContainer.appendChild(headlineElement);
+//     });
+//     showHeadline(currentHeadlineIndex);
+// }
+
+// function handleScroll() {
+//     const scrollPosition = window.pageYOffset;
+//     const windowHeight = window.innerHeight;
+//     const scrollIndex = Math.floor(scrollPosition / windowHeight);
+
+//     if (scrollIndex !== currentHeadlineIndex) {
+//         hideHeadline(currentHeadlineIndex);
+//         currentHeadlineIndex = scrollIndex;
+//         showHeadline(currentHeadlineIndex);
+//     }
+// }
+
+// function init() {
+//     setupHeadlines();
+//     document.body.style.height = `${headlines.length * 100}vh`;
+//     window.addEventListener('scroll', handleScroll);
+// }
+
+// init();
+
+
+const headlineContainer = document.getElementById('headline-container');
+
+function createHeadlineElement(headline) {
+    const headlineElement = document.createElement('div');
+    headlineElement.classList.add('headline');
+
+    const headlineText = document.createElement('div');
+    headlineText.classList.add('headline-text');
+    headlineText.innerHTML = headline.text;
+    headlineElement.appendChild(headlineText);
+
+    return headlineElement;
 }
 
+function setupHeadlines() {
+    headlines.forEach((headline) => {
+        const headlineElement = createHeadlineElement(headline);
+        headlineContainer.appendChild(headlineElement);
+    });
+}
 
-// Update oscillators and gains based on scroll position
-// Update oscillators and gains based on scroll position
-const updateTone = (scrollRatio) => {
-    const scrollY = window.scrollY || window.pageYOffset;
-    const maxHeight = document.body.scrollHeight - window.innerHeight;    
+function getCurrentHeadline() {
+    const scrollPosition = window.pageYOffset;
+    const windowHeight = window.innerHeight;
+    const documentHeight = document.documentElement.scrollHeight;
+    const totalScrollableHeight = documentHeight - windowHeight;
 
-    for (let i = 0; i < numOctaves * oscillatorsPerOctave; i++) {
-        const freqMultiplier = Math.pow(2, i / oscillatorsPerOctave + scrollRatio);
-        const frequency = baseFrequency * freqMultiplier;
-        oscillators[i].frequency.setValueAtTime(frequency, Tone.now());
-
-        const gainValue = 1 - (i / oscillatorsPerOctave - scrollRatio) % 1;
-        gains[i].gain.setValueAtTime(gainValue * gainValue, Tone.now()); // Apply a quadratic curve to make the transitions smoother
+    if (totalScrollableHeight === 0) {
+        return 0;
     }
-};
-document.addEventListener('wheel', (e) => {    
-    const scrollY = window.scrollY || window.pageYOffset;
-    const maxHeight = document.body.scrollHeight - window.innerHeight;
-    const scrollRatio = scrollY / maxHeight;
-    updateTone(scrollRatio);
 
-    // Implement infinite scroll by resetting the scroll position when it reaches the bottom of the page
-    if (scrollY >= maxHeight) {
-        window.scrollTo(0, 1); // Scroll back to the top
-    }
-})
-    
+    const scrollPercentage = scrollPosition / totalScrollableHeight;
+    const currentHeadlineIndex = Math.floor(scrollPercentage * headlines.length);
+
+    return currentHeadlineIndex;
+}
+
+function createTimelineElement(year, index) {
+    const timelineYear = document.createElement('div');
+    timelineYear.classList.add('timeline-year');
+    timelineYear.setAttribute('data-index', index);
+    timelineYear.innerHTML = year;
+    return timelineYear;
+}
+
+function createTimelineLine() {
+    const timelineLine = document.createElement('div');
+    timelineLine.classList.add('timeline-line');
+    return timelineLine;
+}
+
+function setupTimeline() {
+    const timeline = document.createElement('div');
+    timeline.classList.add('timeline');
+
+    const timelineLine = createTimelineLine();
+    timeline.appendChild(timelineLine);
+
+    headlines.forEach((headline, index) => {
+        const timelineYear = createTimelineElement(headline.year, index);
+        timeline.appendChild(timelineYear);
+    });
+
+    document.body.appendChild(timeline);
+}
+
+function updateActiveYear() {
+    const currentHeadlineIndex = getCurrentHeadline();
+    const timelineYears = document.querySelectorAll('.timeline-year');
+    timelineYears.forEach((year, index) => {
+        if (index === currentHeadlineIndex) {
+            year.classList.add('active-year');
+        } else {
+            year.classList.remove('active-year');
+        }
+    });
+}
+
+function handleScroll() {
+    const currentHeadlineIndex = getCurrentHeadline();
+    updateActiveYear();
+    console.log(`Current headline index: ${currentHeadlineIndex}`);
+}
+
+function init() {
+    setupHeadlines();
+    setupTimeline();
+    updateActiveYear()
+    window.addEventListener('wheel', handleScroll);
+}
+
+init();
