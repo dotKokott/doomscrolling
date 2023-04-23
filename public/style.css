@@ -8,31 +8,11 @@ body, html {
   height: 100%;
   font-family: 'Georgia', serif;
 }
+*/
 
-#headline-container {
-  height: 100%;
-  position: relative;
+html {
+  scroll-behavior: smooth;
 }
-
-.headline {
-  position: absolute;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  text-align: center;
-  font-size: 2rem;
-  padding: 1rem;
-  opacity: 0;
-  transition: opacity 1s;
-}
-
-.headline.visible {
-  opacity: 1;
-} */
 
 * {
   margin: 0;
@@ -41,14 +21,16 @@ body, html {
 }
 
 body, html {
-  height: 100%;  
-  overflow-x: hidden;
+
+  height: 100%;
+  /* */
   font-family: 'Noto Sans', sans-serif;
   background-color: #1c1c1c;
-  color: #f0f0f0;  
+  color: #f0f0f0;
 }
 
 #headline-container {
+  /* overflow-x: hidden; */
   display: grid;
   grid-template-rows: repeat(auto-fit, 100vh);
   height: 100%;
@@ -94,7 +76,7 @@ body, html {
   position: absolute;
   top: 0;
   bottom: 0;
-  left: 50%;
+  left: 0%;
   border-left: 1px solid #ccc;
   width: 0;
   height: 100%;

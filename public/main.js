@@ -172,8 +172,8 @@ function setupHeadlines() {
 }
 
 function getCurrentHeadline() {
-    const scrollPosition = window.pageYOffset;
     const windowHeight = window.innerHeight;
+    const scrollPosition = window.pageYOffset + windowHeight / 2;        
     const documentHeight = document.documentElement.scrollHeight;
     const totalScrollableHeight = documentHeight - windowHeight;
 
@@ -228,7 +228,20 @@ function updateActiveYear() {
     });
 }
 
-function handleScroll() {
+function handleScroll(event) {
+    event.preventDefault();
+
+    const delta = event.deltaY;    
+    const scrollStep = 100 * Math.sign(delta) // Adjust this value to control the scroll step
+  
+    const currentScrollTop = window.pageYOffset;
+    const targetScrollTop = currentScrollTop + scrollStep;
+  
+    window.scrollTo({
+        top: targetScrollTop,
+        behavior: "smooth"
+      });
+
     const currentHeadlineIndex = getCurrentHeadline();
     updateActiveYear();
     console.log(`Current headline index: ${currentHeadlineIndex}`);
@@ -238,7 +251,7 @@ function init() {
     setupHeadlines();
     setupTimeline();
     updateActiveYear()
-    window.addEventListener('wheel', handleScroll);
+    window.addEventListener('wheel', handleScroll, { passive: false });
 }
 
 init();
