@@ -49,7 +49,7 @@ class Headline {
         const minAnomaly = temp.minAnomaly;
         const maxAnomaly = temp.maxAnomaly;
 
-        const anomaly = temp.yearlyAnomalies.find(a => a.year === this.year).anomaly
+        const anomaly = temp.yearlyAnomalies.find(a => a.year == this.year).anomaly
         const t = (anomaly - minAnomaly) / (maxAnomaly - minAnomaly);
 
         return t
@@ -140,7 +140,13 @@ let currentHeadlineIndex = 0
 
 async function onHeadlineChanged() {    
     const currentHeadline = headlineObjects[currentHeadlineIndex]
-//    console.log(currentHeadline.getAnomaly())
+    console.log(currentHeadlineIndex)
+
+
+    const anomaly = currentHeadline.getAnomaly()
+
+    const newRoot = min_freq + (max_freq - min_freq) * anomaly;
+    updateRootNoteForAll(newRoot);
 
     await currentHeadline.generateTweets()
 
@@ -276,21 +282,12 @@ function handleScroll(event) {
     
     updateActiveYear(currentHeadlineIndex);
 
-    updateRootNoteOnScroll();
+    // updateRootNoteOnScroll();
 
     if (lastHeadlineIndex !== currentHeadlineIndex) {
         onHeadlineChanged();
     }
 }
-
-function updateRootNoteOnScroll() {
-    const scrollTop = window.scrollY || document.documentElement.scrollTop;
-    const scrollHeight = document.documentElement.scrollHeight - document.documentElement.clientHeight;
-    const scrollRatio = scrollTop / scrollHeight;
-  
-    const newRoot = min_freq + (max_freq - min_freq) * scrollRatio;
-    updateRootNoteForAll(newRoot);
-  }
 
 function init() {
     setupHeadlines();
@@ -301,6 +298,19 @@ function init() {
 
 init();
 
+// function updateRootNoteOnScroll() {
+//     const scrollTop = window.scrollY || document.documentElement.scrollTop;
+//     const scrollHeight = document.documentElement.scrollHeight - document.documentElement.clientHeight;
+//     const scrollRatio = scrollTop / scrollHeight;
+  
+//     const currentHeadline = headlineObjects[currentHeadlineIndex]
+//     console.log(headlineObjects)
+//     console.log(currentHeadlineIndex)
+//     const anomaly = currentHeadline.getAnomaly()
+
+//     const newRoot = min_freq + (max_freq - min_freq) * anomaly;
+//     updateRootNoteForAll(newRoot);
+//   }
 
 const ctx = new (window.AudioContext || window.webkitAudioContext)();
 const tuna = new Tuna(ctx);
