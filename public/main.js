@@ -49,7 +49,13 @@ class Headline {
         const minAnomaly = temp.minAnomaly;
         const maxAnomaly = temp.maxAnomaly;
 
-        const anomaly = temp.yearlyAnomalies.find(a => a.year == this.year).anomaly
+        const entry = temp.yearlyAnomalies.find(a => a.year == this.year)
+
+        if(!entry) {
+            return 0
+        }
+
+        const anomaly = entry.anomaly
         const t = (anomaly - minAnomaly) / (maxAnomaly - minAnomaly);
 
         return t
@@ -140,8 +146,6 @@ let currentHeadlineIndex = 0
 
 async function onHeadlineChanged() {    
     const currentHeadline = headlineObjects[currentHeadlineIndex]
-    console.log(currentHeadlineIndex)
-
 
     const anomaly = currentHeadline.getAnomaly()
 
@@ -156,24 +160,27 @@ async function onHeadlineChanged() {
 }
 
 async function main() {
-    const currentHeadline = headlineObjects[0]
-    console.log("Generating tweets")
-    await currentHeadline.generateTweets()
-
-    player.currentLeftSamples = currentHeadline.getTweetUrls('activist')
-    player.currentRightSamples = currentHeadline.getTweetUrls('skeptic')
+    // const shepardRissetGlissando = new ShepardRissetGlissando();
+    // shepardRissetGlissando.start();
     
+    // // Example: Change the base note to MIDI note number 62 (D4) after 3 seconds
+    // setTimeout(() => {
+    //     shepardRissetGlissando.setBaseNote(62);
+    // }, 3000);
+
     createShep()
 
-    //await currentHeadline.readTweets()
+    //onHeadlineChanged()
 
-    // createOscillators()
-    // updateTone(0)
-    // for (const headline of headlineObjects) {        
-    //     await headline.generateTweets()
-    //     await headline.readTweets()
-    //     break
-    // }
+    // const currentHeadline = headlineObjects[0]
+    // console.log("Generating tweets")
+    // await currentHeadline.generateTweets()
+
+    // player.currentLeftSamples = currentHeadline.getTweetUrls('activist')
+    // player.currentRightSamples = currentHeadline.getTweetUrls('skeptic')
+    
+    // createShep()
+
 }
 
 //attach a click listener to a play button
@@ -209,7 +216,8 @@ function setupHeadlines() {
 
 function getCurrentHeadlineIndex() {
     const windowHeight = window.innerHeight;
-    const scrollPosition = window.pageYOffset + windowHeight / 2;        
+    // const scrollPosition = window.pageYOffset + windowHeight / 2;       
+    const scrollPosition = window.pageYOffset; 
     const documentHeight = document.documentElement.scrollHeight;
     const totalScrollableHeight = documentHeight - windowHeight;
 
@@ -282,7 +290,7 @@ function handleScroll(event) {
     
     updateActiveYear(currentHeadlineIndex);
 
-    // updateRootNoteOnScroll();
+    updateShepardGainOnScroll()
 
     if (lastHeadlineIndex !== currentHeadlineIndex) {
         onHeadlineChanged();
@@ -315,13 +323,17 @@ init();
 const ctx = new (window.AudioContext || window.webkitAudioContext)();
 const tuna = new Tuna(ctx);
 
+const shepardGain = ctx.createGain();
+shepardGain.gain.value = 0
+shepardGain.connect(ctx.destination)
+
 const chorus = new tuna.Chorus({
     rate: 5.25,
     feedback: 0.3,
     delay: 0.025,
     bypass: 0
 });
-chorus.connect(ctx.destination);
+chorus.connect(shepardGain);
 
 let ROOT = 110;
 let RAMP_SPEED = 80;
@@ -376,7 +388,17 @@ let oscs = []
 const min_freq = 110 // Define your minimum root note frequency here
 const max_freq = 110 * 2 * 2 * 2 * 2;
 
-console.log(freqs[0], freqs[freqs.length - 1])
+//console.log(freqs[0], freqs[freqs.length - 1])
+
+function updateShepardGainOnScroll() {
+    const scrollTop = window.scrollY || document.documentElement.scrollTop;
+    const scrollHeight = document.documentElement.scrollHeight - document.documentElement.clientHeight;
+    const scrollRatio = scrollTop / scrollHeight;
+  
+    console.log(scrollRatio)
+
+    shepardGain.gain.exponentialRampToValueAtTime(scrollRatio, ctx.currentTime + 0.1);
+}
 
 function updateRootNoteForAll(newRoot) {
     oscs.forEach((shep) => {
@@ -394,3 +416,46 @@ function createShep() {
       ));
 }
 
+
+// class ShepardRissetGlissando {
+//     constructor() {
+//         this.audioContext = new (window.AudioContext || window.webkitAudioContext)();
+//         this.oscillators = [];
+//         this.gainNodes = [];
+//         this.baseNote = 60;
+//         this.numberOfOctaves = 6;
+//         this.createOscillators();
+//     }
+
+//     noteToFrequency(note) {
+//         return 440 * Math.pow(2, (note - 69) / 12);
+//     }
+
+//     createOscillators() {
+//         for (let i = 0; i < this.numberOfOctaves; i++) {
+//             const osc = this.audioContext.createOscillator();
+//             const gain = this.audioContext.createGain();
+
+//             osc.type = 'sine';
+//             osc.frequency.value = this.noteToFrequency(this.baseNote + i * 12);
+//             gain.gain.value = 1 / (i + 1);
+
+//             osc.connect(gain);
+//             gain.connect(this.audioContext.destination);
+
+//             this.oscillators.push(osc);
+//             this.gainNodes.push(gain);
+//         }
+//     }
+
+//     start() {
+//         this.oscillators.forEach(osc => osc.start());
+//     }
+
+//     setBaseNote(note) {
+//         this.baseNote = note;
+//         this.oscillators.forEach((osc, i) => {
+//             osc.frequency.value = this.noteToFrequency(this.baseNote + i * 12);
+//         });
+//     }
+// }

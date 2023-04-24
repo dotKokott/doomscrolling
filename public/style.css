@@ -62,14 +62,13 @@ body, html {
 }
 
 .timeline {
-  position: fixed;
+  /* position: fixed; */
   top: 0;
   bottom: 0;
   right: 20px;
   display: flex;
   flex-direction: column;
   justify-content: space-between;
-  height: 100vh;
 }
 
 .timeline-line {
@@ -84,12 +83,13 @@ body, html {
 
 .timeline-year {
   position: relative;
-  font-size: 0.8rem;
+  font-size: 1.5rem;
   font-weight: bold;
   opacity: 0.7;
   text-align: right;
   padding-left: 5px;
   padding-right: 5px;
+  height: 100vh;
 }
 
 .active-year {

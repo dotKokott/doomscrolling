@@ -13,15 +13,15 @@ export class TweetReader {
     leftChannelGain = new Tone.Gain();
     rightChannelGain = new Tone.Gain();    
 
-    crossFade = new Tone.CrossFade(0.5);
+    crossFade = new Tone.CrossFade();    
 
     // Create LFO for panning
     panningLFO = new Tone.LFO({
-        frequency: 0.25, 
+        frequency: 0.1, 
         // amplitude: 0.5, // Adjust the amplitude to control the depth of the panning effect
         type: 'sine', // Use a sine wave for smooth panning
-        min: 0.2,
-        max: 0.8
+        min: 0.1,
+        max: 0.6
     });
 
     constructor() {
@@ -38,14 +38,17 @@ export class TweetReader {
         this.leftChannelPanner.connect(this.crossFade.a);
         this.rightChannelPanner.connect(this.crossFade.b);
 
+        this.crossFade.fade.value = 0.5
         // Connect LFO to left and right channel gains
         this.panningLFO.connect(this.crossFade.fade);
-        // this.startPanning();
+        this.panningLFO.start();                
+        
+        this.startPanning();
         this.startPlayingRandomSamples();
     }
 
     startPanning() {
-        this.panningLFO.start();
+        
     }
 
     startPlayingRandomSamples() {
@@ -65,7 +68,6 @@ export class TweetReader {
     }
 
     async playRandomSample(player, samples, offset = 0) {
-        console.log("Trying to play sample")
         if(samples.length == 0) {
             return;
         }

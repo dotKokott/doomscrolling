@@ -9,7 +9,6 @@ export class Temperature {
 
     constructor(minYear, maxYear) {
         this.yearlyAnomalies = this.calculateYearlyAnomalies(temperature, 1880, 2024)
-        console.log(this.yearlyAnomalies);
     }
 
     calculateYearlyAnomalies(data, startYear, endYear) {
