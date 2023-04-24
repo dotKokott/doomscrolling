@@ -311,6 +311,12 @@ const overlay = document.getElementById('overlay');
 overlay.addEventListener('click', async () => { 
     overlay.remove()
 
+    try {
+        await document.documentElement.requestFullscreen()
+    } catch(error) {
+        console.log(error)
+    }
+
     init()    
     await Tone.start()
     console.log('audio is ready')
