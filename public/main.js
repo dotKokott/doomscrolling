@@ -145,18 +145,17 @@ let lastHeadlineIndex = 0
 let currentHeadlineIndex = 0
 
 async function onHeadlineChanged() {    
-    const currentHeadline = headlineObjects[currentHeadlineIndex]
+    const currentHeadline = headlineObjects[currentHeadlineIndex]    
 
     const anomaly = currentHeadline.getAnomaly()
 
-    const newRoot = min_freq + (max_freq - min_freq) * anomaly;
+    const newRoot = MIN_ROOT + (MAX_ROOT - MIN_ROOT) * anomaly;
     updateRootNoteForAll(newRoot);
-
+    
     await currentHeadline.generateTweets()
 
     player.currentLeftSamples = currentHeadline.getTweetUrls('activist')
     player.currentRightSamples = currentHeadline.getTweetUrls('skeptic')
-
 }
 
 async function main() {
@@ -170,7 +169,7 @@ async function main() {
 
     createShep()
 
-    //onHeadlineChanged()
+    onHeadlineChanged()
 
     // const currentHeadline = headlineObjects[0]
     // console.log("Generating tweets")
@@ -183,26 +182,28 @@ async function main() {
 
 }
 
-//attach a click listener to a play button
-document.documentElement.addEventListener('click', async () => {  
-    
-    await Tone.start()
-    console.log('audio is ready')
-
-    main()
-})
-
-
 const headlineContainer = document.getElementById('headline-container');
 
 function createHeadlineElement(headline) {
     const headlineElement = document.createElement('div');
     headlineElement.classList.add('headline');
 
+    
     const headlineText = document.createElement('div');
     headlineText.classList.add('headline-text');
-    headlineText.innerHTML = headline.text;
+    
+    headlineText.id = headline.year;
+
+    //headlineText.innerHTML = headline.text;
     headlineElement.appendChild(headlineText);
+
+    // add typeit
+    new TypeIt(headlineText, {
+        speed: 20,
+        strings: headline.text,
+        waitUntilVisible: true,
+    }).go();
+
 
     return headlineElement;
 }
@@ -216,8 +217,8 @@ function setupHeadlines() {
 
 function getCurrentHeadlineIndex() {
     const windowHeight = window.innerHeight;
-    // const scrollPosition = window.pageYOffset + windowHeight / 2;       
-    const scrollPosition = window.pageYOffset; 
+    const scrollPosition = window.pageYOffset + windowHeight / 2;       
+    //const scrollPosition = window.pageYOffset; 
     const documentHeight = document.documentElement.scrollHeight;
     const totalScrollableHeight = documentHeight - windowHeight;
 
@@ -239,18 +240,18 @@ function createTimelineElement(year, index) {
     return timelineYear;
 }
 
-function createTimelineLine() {
-    const timelineLine = document.createElement('div');
-    timelineLine.classList.add('timeline-line');
-    return timelineLine;
-}
+// function createTimelineLine() {
+//     const timelineLine = document.createElement('div');
+//     timelineLine.classList.add('timeline-line');
+//     return timelineLine;
+// }
 
 function setupTimeline() {
     const timeline = document.createElement('div');
     timeline.classList.add('timeline');
 
-    const timelineLine = createTimelineLine();
-    timeline.appendChild(timelineLine);
+    // const timelineLine = createTimelineLine();
+    // timeline.appendChild(timelineLine);
 
     headlines.forEach((headline, index) => {
         const timelineYear = createTimelineElement(headline.year, index);
@@ -301,10 +302,21 @@ function init() {
     setupHeadlines();
     setupTimeline();
     updateActiveYear()
-    window.addEventListener('wheel', handleScroll, { passive: false });
+    window.addEventListener('scroll', handleScroll, { passive: false });
+
+
 }
 
-init();
+const overlay = document.getElementById('overlay');
+overlay.addEventListener('click', async () => { 
+    overlay.remove()
+
+    init()    
+    await Tone.start()
+    console.log('audio is ready')
+
+    main()    
+})   
 
 // function updateRootNoteOnScroll() {
 //     const scrollTop = window.scrollY || document.documentElement.scrollTop;
@@ -337,6 +349,9 @@ chorus.connect(shepardGain);
 
 let ROOT = 110;
 let RAMP_SPEED = 80;
+
+let MIN_ROOT = 110; // A2
+let MAX_ROOT = 880; // A5
 
 const getStep = (freq, step = 12) => freq * Math.pow(2, step / 12);
 
@@ -371,7 +386,7 @@ class Shep {
   updateRootNote(newRoot, transitionTime = 0.1) {
     this.maxFreq = getStep(newRoot, this.maxFreqStep);
     const currentTime = this.ctx.currentTime;
-    this.o.frequency.setValueAtTime(this.o.frequency.value, currentTime);
+    // this.o.frequency.setValueAtTime(this.o.frequency.value, currentTime);
     this.o.frequency.exponentialRampToValueAtTime(this.maxFreq, currentTime + transitionTime);
   }
   
@@ -385,8 +400,8 @@ class Shep {
 const freqs = new Array(6).fill().map((e, i) => getStep(ROOT, i * 18));
 
 let oscs = []
-const min_freq = 110 // Define your minimum root note frequency here
-const max_freq = 110 * 2 * 2 * 2 * 2;
+// const min_freq = 110 // Define your minimum root note frequency here
+// const max_freq = 110 * 2 * 2 * 2 * 2;
 
 //console.log(freqs[0], freqs[freqs.length - 1])
 
@@ -394,13 +409,14 @@ function updateShepardGainOnScroll() {
     const scrollTop = window.scrollY || document.documentElement.scrollTop;
     const scrollHeight = document.documentElement.scrollHeight - document.documentElement.clientHeight;
     const scrollRatio = scrollTop / scrollHeight;
-  
-    console.log(scrollRatio)
-
-    shepardGain.gain.exponentialRampToValueAtTime(scrollRatio, ctx.currentTime + 0.1);
+      
+    if(scrollRatio > 0) {
+        shepardGain.gain.exponentialRampToValueAtTime(scrollRatio, ctx.currentTime + 0.1);
+    }    
 }
 
 function updateRootNoteForAll(newRoot) {
+    ROOT = newRoot;
     oscs.forEach((shep) => {
       shep.updateRootNote(newRoot);
     });
